@@ -1,0 +1,17 @@
+{
+    "name": "ThirettenPixels.SodaDemos.Editor",
+    "references": [
+        "ThirteenPixels.SodaDemos",
+        "ThirteenPixels.Soda.Editor"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

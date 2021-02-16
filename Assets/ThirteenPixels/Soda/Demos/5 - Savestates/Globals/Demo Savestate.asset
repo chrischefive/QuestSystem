@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7c8ff01ae061634bb050e76b8230d90, type: 3}
+  m_Name: Demo Savestate
+  m_EditorClassIdentifier: 
+  entries:
+  - key: Money
+    value: {fileID: 11400000, guid: 2d055fde5bf0fa34c84023e97c5ff398, type: 2}
+  - key: House Count
+    value: {fileID: 11400000, guid: d189faaa4715c634eb37b2be95ec95f7, type: 2}

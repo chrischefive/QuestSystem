@@ -1,0 +1,15 @@
+{
+    "name": "ThirteenPixels.SodaDemos",
+    "references": [
+        "ThirteenPixels.Soda",
+        "ThirteenPixels.Soda.Essentials"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
