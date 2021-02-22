@@ -1,9 +1,8 @@
-
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Chrische.QuestSystem
 {
@@ -13,20 +12,18 @@ namespace Chrische.QuestSystem
         private int _statusIndex = 0;
         private string _description = String.Empty;
         private string _mission = String.Empty;
-        private GameObject _giver = default;
+        private string _giver = default;
         private bool _isOptional = false;
-        private List<Quest> _subQuests = new List<Quest>();
+        private List<SubQuest> _subQuests = new List<SubQuest>();
         private int _selectedSubQuestIndex = 0;
         private static int _minLevel = -10;
         private static int _maxLevel = -1;
         private static int _exPoints = -20;
-        private List<GameObject> _rewards = new List<GameObject>();
 
         private string _subQuestName = String.Empty;
         private string _subQuestMission = String.Empty;
         private string _subQuestDescription = String.Empty;
-        private GameObject _subQuestGiver = default;
-        private List<GameObject> _subQuestRewards = new List<GameObject>();
+        private string _subQuestGiver = default;
 
         private bool _isAddingSubQuest = false;
         private bool _isEditingSubQuest = false;
@@ -66,8 +63,12 @@ namespace Chrische.QuestSystem
                 _minLevel = _tempQuest.MinLevel;
                 _maxLevel = _tempQuest.MaxLevel;
                 _exPoints = _tempQuest.ExPoints;
-                _rewards = _tempQuest.Rewards;
-                _subQuests = _tempQuest.SubQuests;
+                var sub = GetSubObjectOfType<SubQuest>(_tempQuest);
+                _subQuests.Clear();
+                foreach (var s in sub)
+                {
+                    _subQuests.Add(s as SubQuest);
+                }
                 _isContentShown = true;
             }
 
@@ -81,14 +82,22 @@ namespace Chrische.QuestSystem
 
             if (GUILayout.Button("Clear all"))
             {
-                _isContentShown = false;
-                _isAddingSubQuest = false;
-                _isEditingSubQuest = false;
                 _tempQuest = null;
-                _description = String.Empty;
-                _name = String.Empty;
-                _subQuests.Clear();
+                ClearAll();
             }
+        }
+
+        private void ClearAll()
+        {
+            _isContentShown = false;
+            _isAddingSubQuest = false;
+            _isEditingSubQuest = false;
+            _mission = String.Empty;
+            _giver = String.Empty;
+            _description = String.Empty;
+            _subQuests.Clear();
+            _name = String.Empty;
+            _subQuests.Clear();
         }
 
         private void DrawContent()
@@ -101,7 +110,7 @@ namespace Chrische.QuestSystem
             EditorGUILayout.BeginHorizontal();
             {
                 GUILayout.Label("Name:");
-                _name = EditorGUILayout.TextField(_name);
+                _name = EditorGUILayout.TextField(_name, GUILayout.Width(300));
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
@@ -114,7 +123,7 @@ namespace Chrische.QuestSystem
                     var content = new GUIContent(status.ToString());
                     allStatus.Add(content);
                 }
-                _statusIndex = EditorGUILayout.Popup(new GUIContent("Status:"), _statusIndex, allStatus.ToArray());
+                _statusIndex = EditorGUILayout.Popup(new GUIContent("Status:"), _statusIndex, allStatus.ToArray(), GUILayout.Width(300));
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
@@ -138,7 +147,7 @@ namespace Chrische.QuestSystem
             EditorGUILayout.BeginHorizontal();
             {
                 EditorGUILayout.LabelField("Giver:");
-                _giver = EditorGUILayout.ObjectField(_tempQuest, typeof(GameObject), true) as GameObject;
+                _giver = EditorGUILayout.TextField(_giver);
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
@@ -186,10 +195,16 @@ namespace Chrische.QuestSystem
                 {
                     allSubQuest.Add(subQuest.ToString());
                 }
-                _selectedSubQuestIndex = EditorGUILayout.Popup("SubQuest to edit", _selectedSubQuestIndex, allSubQuest.ToArray());
+                _selectedSubQuestIndex = EditorGUILayout.Popup("SubQuest", _selectedSubQuestIndex, allSubQuest.ToArray());
                 if (GUILayout.Button("Edit"))
                 {
                     _isEditingSubQuest = true;
+                }
+
+                if (GUILayout.Button("Delete"))
+                {
+                    _subQuests.RemoveAt(_selectedSubQuestIndex);
+                    Repaint();
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -200,8 +215,7 @@ namespace Chrische.QuestSystem
                 _subQuestName = String.Empty;
                 _subQuestMission = String.Empty;
                 _subQuestDescription = String.Empty;
-                _subQuestGiver = default;
-                _subQuestRewards.Clear();
+                _subQuestGiver = String.Empty;
                 Repaint();
             }
             
@@ -220,10 +234,13 @@ namespace Chrische.QuestSystem
             EditorGUILayout.Space();
             if (GUILayout.Button("Save Quest"))
             {
-                
                 var questToSave = GetQuestToSave();
                 var path = "Assets/" + questToSave.Name + "-quest.asset";
                 AssetDatabase.CreateAsset(questToSave, path);
+                foreach (var quest in _subQuests)
+                {
+                    AssetDatabase.AddObjectToAsset(quest, questToSave);
+                }
                 AssetDatabase.SaveAssets();
             }
         }
@@ -234,18 +251,16 @@ namespace Chrische.QuestSystem
             questToSave.Name = _name;
             questToSave.Description = _description;
             questToSave.Giver = _giver;
-            questToSave.Rewards = _rewards;
             questToSave.Status = (QuestStatus) _statusIndex;
             questToSave.ExPoints = _exPoints;
             questToSave.IsOptional = _isOptional;
             questToSave.MaxLevel = _maxLevel;
             questToSave.MinLevel = _minLevel;
-            questToSave.SubQuests = _subQuests;
             questToSave.Mission = _mission;
             return questToSave;
         }
         
-        private void DrawSubQuest(Quest quest)
+        private void DrawSubQuest(SubQuest quest)
         {
             if (quest != null)
             {
@@ -290,7 +305,7 @@ namespace Chrische.QuestSystem
                     EditorGUILayout.BeginHorizontal();
                     {
                         EditorGUILayout.LabelField("Giver:");
-                        _subQuestGiver = EditorGUILayout.ObjectField(_subQuestGiver, typeof(GameObject), true) as GameObject;
+                        _subQuestGiver = EditorGUILayout.TextField(_subQuestGiver);
                     }
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space();
@@ -303,7 +318,7 @@ namespace Chrische.QuestSystem
             
             if (GUILayout.Button("Save SubQuest"))
             {
-                var subQuest = CreateInstance<Quest>();
+                var subQuest = CreateInstance<SubQuest>();
                 subQuest.Name = _subQuestName;
                 subQuest.Mission = _subQuestMission;
                 subQuest.Description = _subQuestDescription;
@@ -327,16 +342,14 @@ namespace Chrische.QuestSystem
             _subQuestDescription = String.Empty;
             _subQuestMission = String.Empty;
             _subQuestGiver = default;
-            _subQuestRewards = new List<GameObject>();
         }
 
-        private void FillSubQuest(Quest quest)
+        private void FillSubQuest(SubQuest quest)
         {
             _subQuestName = quest.Name;
             _subQuestDescription = quest.Description;
             _subQuestMission = quest.Mission;
             _subQuestGiver = quest.Giver;
-            _subQuestRewards = quest.Rewards;
         }
         
         private static void DrawUiLine(Color color, int thickness = 2, int padding = 10)
@@ -346,6 +359,22 @@ namespace Chrische.QuestSystem
             rect.y += (int)(padding / 2f);
             rect.x -= 2;
             EditorGUI.DrawRect(rect, color);
+        }
+        
+        public static List<ScriptableObject> GetSubObjectOfType<T>(ScriptableObject asset)
+        {
+            Object[] objs = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(asset));
+ 
+            List<ScriptableObject> ofType = new List<ScriptableObject>();
+ 
+            foreach(Object o in objs)
+            {
+                if(o.GetType() == typeof(T))
+                {
+                    ofType.Add((ScriptableObject)o);
+                }
+            }
+            return ofType;
         }
     }
 }

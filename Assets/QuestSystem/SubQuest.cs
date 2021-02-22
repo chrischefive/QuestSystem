@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace Chrische.QuestSystem
 {
     [Serializable]
-    public class Quest : ScriptableObject
+    public class SubQuest : ScriptableObject
     {
         private string _name = String.Empty;
         private QuestStatus _status = QuestStatus.NOT_YET_GETTED;
@@ -13,10 +13,7 @@ namespace Chrische.QuestSystem
         private string _mission = String.Empty;
         private string _giver = String.Empty;
         private bool _isOptional = false;
-        private int _minLevel = -1;
-        private int _maxLevel = -1;
         private int _exPoints = -1;
-        private List<SubQuest> _subQuests = new List<SubQuest>();
 
         public override string ToString()
         {
@@ -25,28 +22,10 @@ namespace Chrische.QuestSystem
 
         #region Properties
 
-        public int MinLevel
-        {
-            get => _minLevel;
-            set => _minLevel = value;
-        }
-
-        public int MaxLevel
-        {
-            get => _maxLevel;
-            set => _maxLevel = value;
-        }
-
         public int ExPoints
         {
             get => _exPoints;
             set => _exPoints = value;
-        }
-
-        public List<SubQuest> SubQuests
-        {
-            get => _subQuests;
-            set => _subQuests = value;
         }
 
         public bool IsOptional
@@ -84,7 +63,7 @@ namespace Chrische.QuestSystem
             get => _giver;
             set => _giver = value;
         }
-
+        
         #endregion
     }
 }
